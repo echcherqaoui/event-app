@@ -1,0 +1,3 @@
+com.eventapp.sharedutils.security.impl.SecurityServiceImpl
+com.eventapp.sharedutils.security.impl.JwtAuthConverter
+com.eventapp.sharedutils.config.SharedUtilsAutoConfiguration
