@@ -1,0 +1,3 @@
+com.eventapp.common.inventory.service.impl.InventoryServiceImpl
+com.eventapp.common.inventory.config.DefaultTtlProviderImpl
+com.eventapp.common.inventory.config.RedisConfig
