@@ -1,10 +1,7 @@
 package com.eventapp.common.inventory.config;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.stereotype.Component;
+import com.eventapp.common.inventory.ports.IInventoryTtlProvider;
 
-@Component
-@ConditionalOnMissingBean(IInventoryTtlProvider.class)
 public class DefaultTtlProviderImpl implements IInventoryTtlProvider {
     @Override
     public long getLockTtlSeconds() {

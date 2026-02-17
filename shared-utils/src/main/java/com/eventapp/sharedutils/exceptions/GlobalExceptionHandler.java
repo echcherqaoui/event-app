@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import static com.eventapp.sharedutils.exceptions.enums.CommonErrorCode.INTERNAL_SERVER_ERROR;
 
-
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {

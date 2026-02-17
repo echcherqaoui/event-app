@@ -1,13 +1,11 @@
-package com.eventapp.sharedutils.security.impl;
+package com.eventapp.sharedutils.security.keycloak;
 
 import com.eventapp.sharedutils.exceptions.domain.UnauthorizedException;
 import com.eventapp.sharedutils.security.ISecurityService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.stereotype.Service;
 
-@Service
 public class SecurityServiceImpl implements ISecurityService {
 
     @Override
@@ -25,6 +23,6 @@ public class SecurityServiceImpl implements ISecurityService {
         if (auth != null && auth.getPrincipal() instanceof Jwt jwt)
             return jwt.getClaimAsString("email");
 
-        return null;
+        throw new UnauthorizedException();
     }
 }

@@ -1,12 +1,12 @@
 package com.eventapp.common.inventory.service;
 
 import com.eventapp.common.inventory.dto.GhostReservationMetadata;
-import com.eventapp.common.inventory.enums.EventLifecycleStatus;
+import com.eventapp.common.inventory.domain.EventLifecycleStatus;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public interface IInventoryService {
+public interface ITicketCachePort {
     void initializeInventory(Long eventId,
                              int capacity,
                              EventLifecycleStatus status);
