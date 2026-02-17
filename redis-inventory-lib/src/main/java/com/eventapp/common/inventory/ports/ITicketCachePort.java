@@ -1,4 +1,4 @@
-package com.eventapp.common.inventory.service;
+package com.eventapp.common.inventory.ports;
 
 import com.eventapp.common.inventory.dto.GhostReservationMetadata;
 import com.eventapp.common.inventory.domain.EventLifecycleStatus;

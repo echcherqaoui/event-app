@@ -1,4 +1,4 @@
-package com.eventapp.common.inventory.utils;
+package com.eventapp.common.inventory.redis;
 
 import java.util.UUID;
 

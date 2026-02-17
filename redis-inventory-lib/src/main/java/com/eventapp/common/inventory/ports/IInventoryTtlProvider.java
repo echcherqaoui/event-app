@@ -1,4 +1,4 @@
-package com.eventapp.common.inventory.config;
+package com.eventapp.common.inventory.ports;
 
 public interface IInventoryTtlProvider {
     long getLockTtlSeconds();

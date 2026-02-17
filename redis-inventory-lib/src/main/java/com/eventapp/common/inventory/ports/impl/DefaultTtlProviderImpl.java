@@ -1,4 +1,4 @@
-package com.eventapp.common.inventory.config;
+package com.eventapp.common.inventory.ports.impl;
 
 import com.eventapp.common.inventory.ports.IInventoryTtlProvider;
 

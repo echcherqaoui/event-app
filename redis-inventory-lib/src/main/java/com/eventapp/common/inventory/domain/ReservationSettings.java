@@ -1,4 +1,4 @@
-package com.eventapp.common.inventory.config;
+package com.eventapp.common.inventory.domain;
 
 public record ReservationSettings(long lockMin,
                                   long shadowBufferMin,

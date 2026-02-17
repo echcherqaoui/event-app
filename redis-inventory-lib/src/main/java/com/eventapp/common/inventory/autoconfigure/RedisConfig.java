@@ -1,4 +1,4 @@
-package com.eventapp.common.inventory.config;
+package com.eventapp.common.inventory.autoconfigure;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;

@@ -1,10 +1,9 @@
-package com.eventapp.common.inventory.service.impl;
+package com.eventapp.common.inventory.redis;
 
 import com.eventapp.common.inventory.ports.IInventoryTtlProvider;
 import com.eventapp.common.inventory.dto.GhostReservationMetadata;
 import com.eventapp.common.inventory.domain.EventLifecycleStatus;
 import com.eventapp.common.inventory.ports.ITicketCachePort;
-import com.eventapp.common.inventory.utils.EventRedisKeys;
 import com.eventapp.sharedutils.exceptions.domain.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

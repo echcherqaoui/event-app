@@ -1,4 +1,4 @@
-package com.eventapp.common.inventory.enums;
+package com.eventapp.common.inventory.domain;
 
 public enum EventLifecycleStatus {
     DRAFT,
