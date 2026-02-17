@@ -1,6 +1,6 @@
 package com.eventapp.userservice.security;
 
-import com.eventapp.sharedutils.security.impl.JwtAuthConverter;
+import com.eventapp.sharedutils.security.keycloak.JwtAuthConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
