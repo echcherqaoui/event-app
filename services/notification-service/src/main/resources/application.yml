@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: notification-service
+  cloud:
+    config:
+      fail-fast: true
+      retry:
+        max-attempts: 4
+  config:
+    import: configserver:${CONFIG_SERVER_URL}
+
+eureka:
+  instance:
+    hostname: notification-service-eventapp
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE}

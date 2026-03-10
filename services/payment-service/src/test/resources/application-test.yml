@@ -1,0 +1,37 @@
+grpc:
+  server:
+    port: 0
+
+resilience4j:
+  circuitbreaker:
+    circuit-breaker-aspect-order: 1
+    configs:
+      default:
+        register-health-indicator: false
+        sliding-window-type: COUNT_BASED
+    instances:
+      booking-service:
+        base-config: default
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 100ms
+        permitted-number-of-calls-in-half-open-state: 3
+        record-failure-predicate: com.eventapp.paymentservice.config.GrpcFailurePredicate
+
+  retry:
+    retry-aspect-order: 2
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 2ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - io.grpc.StatusRuntimeException
+          - java.util.concurrent.TimeoutException
+          - java.net.ConnectException
+    instances:
+      booking-service:
+        base-config: default
+        retry-exception-predicate: com.eventapp.paymentservice.config.GrpcFailurePredicate

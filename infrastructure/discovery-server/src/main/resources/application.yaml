@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: discovery-server
+
+server:
+  port: ${PORT}
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info

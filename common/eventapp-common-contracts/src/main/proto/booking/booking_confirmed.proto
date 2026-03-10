@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+option java_package = "com.eventapp.contracts.booking.v1";
+option java_outer_classname = "BookingConfirmedProto";
+
+message BookingConfirmed {
+  string booking_id = 1;
+  string event_id = 2;
+  string user_id = 3;
+  string user_email = 4;
+  int64 total_amount = 5;
+  google.protobuf.Timestamp confirmed_at = 6;
+  string signature = 7;
+}

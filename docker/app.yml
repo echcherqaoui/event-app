@@ -1,0 +1,270 @@
+services:
+  # ─── Infrastructure ───────────────────────────────────────────
+  discovery-server:
+    build:
+      context: ../infrastructure/discovery-server
+    container_name: discovery-service-eventapp
+    ports:
+      - "${DISCOVERY_PORT}:${DISCOVERY_PORT}"
+    environment:
+      PORT: ${DISCOVERY_PORT}
+    networks:
+      - eventapp-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:${DISCOVERY_PORT}/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  config-service:
+    build:
+      context: ../infrastructure/config-service
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    container_name: config-service-eventapp
+    ports:
+      - "${CONFIG_SERVICE_PORT}:${CONFIG_SERVICE_PORT}"
+    environment:
+      PORT: ${CONFIG_SERVICE_PORT}
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: ${DISCOVERY_SERVICE_URL}
+      CONFIG_URL: ${CONFIG_REPO_URL}
+      GIT_USERNAME: ${GIT_USERNAME}
+      GIT_PASSWORD: ${REPO_PAT}
+    networks:
+      - eventapp-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:${CONFIG_SERVICE_PORT}/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+
+  api-gateway:
+    build:
+      context: ../infrastructure/api-gateway
+    container_name: api-gateway-eventapp
+    ports:
+      - "${GATEWAY_PORT}:${GATEWAY_PORT}"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: ${DISCOVERY_SERVICE_URL}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+      PORT: ${GATEWAY_PORT}
+      SESSION_SECURE: ${SESSION_SECURE}
+      MANAGEMENT_PORT: ${MANAGEMENT_PORT}
+      RD_HOST: ${RD_HOST}
+      RD_PORT: ${RD_PORT}
+      RD_PASSWORD: ${RD_PASSWORD}
+
+      KC_CLIENT_ID: ${KC_GATEWAY_CLIENT_ID}
+      KC_CLIENT_SECRET: ${KC_GATEWAY_CLIENT_SECRET}
+      KC_PUBLIC_BASE_URL: ${KC_PUBLIC_BASE_URL}
+      KC_INTERNAL_BASE_URL: ${KC_INTERNAL_BASE_URL}
+      KC_REALM: ${KC_REALM}
+
+      FRONTEND_URL: ${FRONTEND_URL}
+    networks:
+      - eventapp-net
+    depends_on:
+      config-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ─── Application Services ─────────────────────────────────────
+  user-service:
+    build:
+      context: ../services/user-service
+    container_name: user-service-eventapp
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: ${DISCOVERY_SERVICE_URL}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+      PORT: ${USER_SERVICE_PORT}
+
+      DATASOURCE_URL: jdbc:postgresql://${PG_HOST}:${PG_PORT}/${USER_DB}
+      DATASOURCE_USERNAME: ${PG_USER}
+      DATASOURCE_PASSWORD: ${PG_PASSWORD}
+
+      KC_INTERNAL_BASE_URL: ${KC_INTERNAL_BASE_URL}
+      KC_REALM: ${KC_REALM}
+      KC_CLIENT_ID: ${KC_USER_SERVICE_CLIENT_ID}
+      KC_CLIENT_SECRET: ${KC_USER_SERVICE_SECRET}
+      MANAGEMENT_PORT: ${MANAGEMENT_PORT}
+    networks:
+      - eventapp-net
+    depends_on:
+      config-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    restart: unless-stopped
+
+  event-service:
+    build:
+      context: ../services/event-service
+    container_name: event-service-eventapp
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: ${DISCOVERY_SERVICE_URL}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+      PORT: ${EVENT_SERVICE_PORT}
+      EVENT_SERVICE_GRPC_PORT: ${EVENT_SERVICE_GRPC_PORT}
+
+      DATASOURCE_URL: jdbc:postgresql://${PG_HOST}:${PG_PORT}/${EVENT_DB}
+      DATASOURCE_USERNAME: ${PG_USER}
+      DATASOURCE_PASSWORD: ${PG_PASSWORD}
+
+      RD_HOST: ${RD_HOST}
+      RD_PORT: ${RD_PORT}
+      RD_PASSWORD: ${RD_PASSWORD}
+
+      KC_INTERNAL_BASE_URL: ${KC_INTERNAL_BASE_URL}
+      KC_REALM: ${KC_REALM}
+
+      MANAGEMENT_PORT: ${MANAGEMENT_PORT}
+
+      RSV_TTL: ${RESERVATION_TTl}
+    networks:
+      - eventapp-net
+    depends_on:
+      config-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  booking-service:
+    build:
+      context: ../services/booking-service
+    container_name: booking-service-eventapp
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: ${DISCOVERY_SERVICE_URL}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+      PORT: ${BOOKING_SERVICE_PORT}
+      GRPC_PORT: ${BOOKING_SERVICE_GRPC_PORT}
+
+      DATASOURCE_URL: jdbc:postgresql://${PG_HOST}:${PG_PORT}/${BOOKING_DB}
+      DATASOURCE_USERNAME: ${PG_USER}
+      DATASOURCE_PASSWORD: ${PG_PASSWORD}
+
+      RD_HOST: ${RD_HOST}
+      RD_PORT: ${RD_PORT}
+      RD_PASSWORD: ${RD_PASSWORD}
+
+      KC_INTERNAL_BASE_URL: ${KC_INTERNAL_BASE_URL}
+      KC_REALM: ${KC_REALM}
+
+      KF_SERVER_URL: kafka:${KF_INTERNAL_PORT}
+      SC_REGISTRY_URL: ${SC_REGISTRY_URL}
+      KF_CONSUMER_GROUP_ID: ${KF_BOOKING_CONSUMER_GROUP_ID}
+      KF_PROTOBUF_TYPE: ${KF_BOOKING_PROTOBUF_TYPE}
+
+      MANAGEMENT_PORT: ${MANAGEMENT_PORT}
+
+      LOCK_MIN: ${INV_LOCK_MIN}
+      SHADOW_BUFFER_MIN: ${INV_SHADOW_BUFFER_MIN}
+      SENTINEL_MIN: ${INV_SENTINEL_MIN}
+      HMAC_SECURITY: ${HMAC_SECRET_KEY}  # Shared secret across booking/payment/notification
+    networks:
+      - eventapp-net
+    depends_on:
+      config-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  payment-service:
+    build:
+      context: ../services/payment-service
+    container_name: payment-service-eventapp
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: ${DISCOVERY_SERVICE_URL}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+
+      PORT: ${PAYMENT_SERVICE_PORT}
+
+      DATASOURCE_URL: jdbc:postgresql://${PG_HOST}:${PG_PORT}/${PAYMENT_DB}
+      DATASOURCE_USERNAME: ${PG_USER}
+      DATASOURCE_PASSWORD: ${PG_PASSWORD}
+
+      KC_INTERNAL_BASE_URL: ${KC_INTERNAL_BASE_URL}
+      KC_REALM: ${KC_REALM}
+
+      KF_SERVER_URL: kafka:${KF_INTERNAL_PORT}
+      SC_REGISTRY_URL: ${SC_REGISTRY_URL}
+      KF_CONSUMER_GROUP_ID: ${KF_PAYMENT_CONSUMER_GROUP_ID}
+      KF_PROTOBUF_TYPE: ${KF_PAYMENT_PROTOBUF_TYPE}
+
+      MANAGEMENT_PORT: ${MANAGEMENT_PORT}
+
+      HMAC_SECURITY: ${HMAC_SECRET_KEY}  # Shared secret across booking/payment/notification
+    networks:
+      - eventapp-net
+    depends_on:
+      config-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: ../services/notification-service
+    container_name: notification-service-eventapp
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: ${DISCOVERY_SERVICE_URL}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+
+      PORT: ${NOTIFICATION_SERVICE_PORT}
+
+      DATASOURCE_URL: jdbc:postgresql://${PG_HOST}:${PG_PORT}/${NOTIFICATION_DB}
+      DATASOURCE_USERNAME: ${PG_USER}
+      DATASOURCE_PASSWORD: ${PG_PASSWORD}
+
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${SMTP_PORT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM: ${MAIL_FROM}
+
+      KF_SERVER_URL: kafka:${KF_INTERNAL_PORT}
+      SC_REGISTRY_URL: ${SC_REGISTRY_URL}
+      KF_CONSUMER_GROUP_ID: ${KF_NOTIFICATION_CONSUMER_GROUP_ID}
+      KF_PROTOBUF_TYPE: ${KF_NOTIFICATION_PROTOBUF_TYPE}
+
+      MANAGEMENT_PORT: ${MANAGEMENT_PORT}
+
+      HMAC_SECURITY: ${HMAC_SECRET_KEY}  # Shared secret across booking/payment/notification
+    networks:
+      - eventapp-net
+    depends_on:
+      config-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  eventapp-net:
+    external: true

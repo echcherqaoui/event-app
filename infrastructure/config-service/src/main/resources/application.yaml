@@ -1,0 +1,39 @@
+server:
+  port: ${PORT}
+
+spring:
+  application:
+    name: config-service
+
+  profiles:
+    active: git
+  cloud:
+    config:
+      server:
+        git:
+          uri: ${CONFIG_URL}
+          username: ${GIT_USERNAME}
+          password: ${GIT_PASSWORD}
+          default-label: main
+          force-pull: true
+          clone-on-start: true
+      discovery:
+        enabled: true
+        service-id: config-service
+eureka:
+  instance:
+    hostname: config-service-eventapp
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE}
+
+management:
+  health:
+    config:
+      enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: health, info

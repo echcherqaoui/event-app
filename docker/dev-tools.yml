@@ -1,0 +1,50 @@
+services:
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin-eventapp
+    ports:
+      - "${PGADMIN_PORT_HOST}:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - eventapp-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:${KF_UI_VERSION}
+    container_name: kafka-ui-eventapp
+    ports:
+      - "${KF_UI_PORT}:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: EventAppCluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:${KF_INTERNAL_PORT}
+      DYNAMIC_CONFIG_ENABLED: true
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: "connect"
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: ${KF_CONNECT_URL}
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: ${SC_REGISTRY_URL}
+      AUTH_TYPE: DISABLED
+    networks:
+      - eventapp-net
+    depends_on:
+      kafka:
+        condition: service_healthy
+      connect:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit:${MAILPIT_VERSION}
+    container_name: mailpit-eventapp
+    ports:
+      - "${SMTP_PORT}:1025"
+      - "${MAILPIT_UI_PORT}:8025"
+    restart: unless-stopped
+
+volumes:
+  pgadmin_data:

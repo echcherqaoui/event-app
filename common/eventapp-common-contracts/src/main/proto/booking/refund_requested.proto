@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+option java_package = "com.eventapp.contracts.booking.v1";
+option java_outer_classname = "RefundRequestedProto";
+
+message RefundRequested {
+  string booking_id = 1;
+  string payment_id = 2;
+  string reason = 3;
+  google.protobuf.Timestamp occurred_at = 4;
+  string signature = 5;
+}

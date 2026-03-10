@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+option java_package = "com.eventapp.contracts.payment.v1";
+option java_outer_classname = "PaymentEventsProto";
+
+message PaymentEvent {
+  int64 amount_cents = 1;
+  string currency = 2;
+  string user_id = 3;
+  string booking_id = 4;
+  string payment_id = 5;
+  google.protobuf.Timestamp occurred_at = 6;
+  string signature = 7;
+}
