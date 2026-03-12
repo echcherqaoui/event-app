@@ -34,7 +34,7 @@ services:
       - "${KC_PORT_HOST}:8080"
     environment:
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://${PG_HOST}:${PG_PORT}/keycloak_db
+      KC_DB_URL: jdbc:postgresql://${PG_HOST}:${PG_PORT}/${keycloak_db}
       KC_DB_USERNAME: ${PG_USER}
       KC_DB_PASSWORD: ${PG_PASSWORD}
 
