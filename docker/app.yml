@@ -8,10 +8,11 @@ services:
       - "${DISCOVERY_PORT}:${DISCOVERY_PORT}"
     environment:
       PORT: ${DISCOVERY_PORT}
+      MANAGEMENT_PORT: ${MANAGEMENT_PORT}
     networks:
       - eventapp-net
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:${DISCOVERY_PORT}/actuator/health"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:${MANAGEMENT_PORT}/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -33,10 +34,11 @@ services:
       CONFIG_URL: ${CONFIG_REPO_URL}
       GIT_USERNAME: ${GIT_USERNAME}
       GIT_PASSWORD: ${REPO_PAT}
+      MANAGEMENT_PORT: ${MANAGEMENT_PORT}
     networks:
       - eventapp-net
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:${CONFIG_SERVICE_PORT}/actuator/health"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:${MANAGEMENT_PORT}/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 5

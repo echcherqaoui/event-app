@@ -30,6 +30,7 @@ public class SecurityConfig {
         http
               .csrf(AbstractHttpConfigurer::disable)
               .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/actuator/**").permitAll()
                     // Public GET endpoints
                     .requestMatchers(
                           HttpMethod.GET,

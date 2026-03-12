@@ -30,6 +30,8 @@ eureka:
       defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE}
 
 management:
+  server:
+    port: ${MANAGEMENT_PORT}
   health:
     config:
       enabled: false

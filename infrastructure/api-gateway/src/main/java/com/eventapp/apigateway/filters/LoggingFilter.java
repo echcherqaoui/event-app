@@ -1,19 +1,14 @@
 package com.eventapp.apigateway.filters;
 
-import org.slf4j.LoggerFactory;
-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
 
 /**
  * Global filter that logs HTTP method, path, status code, and duration for every request.
  */
 @Component
-public class LoggingFilter implements GlobalFilter {
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(LoggingFilter.class);
+public class LoggingFilter   {
+    /*private static final org.slf4j.Logger log = LoggerFactory.getLogger(LoggingFilter.class);
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -38,5 +33,5 @@ public class LoggingFilter implements GlobalFilter {
                   duration
             );
         }));
-    }
+    }*/
 }

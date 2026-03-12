@@ -1,5 +1,6 @@
 package com.eventapp.apigateway.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,15 +25,22 @@ import java.util.Set;
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
+    private final String basePath;
+
+    public SecurityConfig(@Value("${api.base-path}") String basePath) {
+        this.basePath = basePath;
+    }
+
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http
               .csrf(ServerHttpSecurity.CsrfSpec::disable)
               .authorizeExchange(exchanges -> exchanges
-                    .pathMatchers(HttpMethod.GET, "/api/v1/events/**").permitAll()
-                    .pathMatchers("/api/v1/events/me").authenticated()
-                    .pathMatchers(HttpMethod.POST, "/api/v1/events").authenticated()
-                    .pathMatchers("/api/v1/admin/**").hasRole("ADMIN")
+      		        .pathMatchers("/actuator/**").permitAll()
+                    .pathMatchers(HttpMethod.GET, basePath + "/api/v1/events/**").permitAll()
+                    .pathMatchers(basePath + "/api/v1/events/me").authenticated()
+                    .pathMatchers(HttpMethod.POST, basePath + "/api/v1/events").authenticated()
+                    .pathMatchers(basePath + "/api/v1/admin/**").hasRole("ADMIN")
                     .anyExchange().authenticated()
               ).oauth2Login(Customizer.withDefaults());
 

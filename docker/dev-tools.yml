@@ -1,6 +1,6 @@
 services:
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:${PGADMIN_VERSION}
     container_name: pgadmin-eventapp
     ports:
       - "${PGADMIN_PORT_HOST}:80"
@@ -46,5 +46,57 @@ services:
       - "${MAILPIT_UI_PORT}:8025"
     restart: unless-stopped
 
+
+  prometheus:
+    image: prom/prometheus:${PROMETHEUS_VERSION}-distroless
+    container_name: prometheus-eventapp
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - eventapp-net
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:${GRAFANA_VERSION}
+    container_name: grafana-eventapp
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - eventapp-net
+    depends_on:
+      - prometheus
+      - tempo
+    restart: unless-stopped
+
+  tempo:
+    image: grafana/tempo:${TEMPO_VERSION}
+    container_name: tempo-eventapp
+    user: root
+    ports:
+      - "${TEMPO_PORT}:3200"
+    volumes:
+      - ./tempo.yml:/etc/tempo.yml
+      - tempo_data:/tmp/tempo
+    command: [ "-config.file=/etc/tempo.yml" ]
+    networks:
+      - eventapp-net
+    restart: unless-stopped
+
+networks:
+  eventapp-net:
+    external: true
+
 volumes:
+  prometheus_data:
   pgadmin_data:
+  grafana_data:
+  tempo_data:

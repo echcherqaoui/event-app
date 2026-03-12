@@ -9,15 +9,18 @@ ENV_FILE     = --env-file .env
 
 # ─── Infrastructure ───────────────────────────────────────────
 up-infra:
-	docker compose -p $(PROJECT_NAME) $(ENV_FILE) $(INFRA_FILE) up -d --remove-orphans
+	docker compose -p $(PROJECT_NAME) $(ENV_FILE) $(INFRA_FILE) up -d
 
 # ─── Application ──────────────────────────────────────────────
 up-app:
-	docker compose -p $(PROJECT_NAME) $(ENV_FILE) $(INFRA_FILE) $(APP_FILE) up -d --remove-orphans
+	docker compose -p $(PROJECT_NAME) $(ENV_FILE) $(INFRA_FILE) $(APP_FILE) up -d
 
 # ─── Dev Tools ────────────────────────────────────────────────
 up-dev-tools:
-	docker compose -p $(PROJECT_NAME) $(ENV_FILE) $(INFRA_FILE) $(DEV_FILE) up -d --remove-orphans
+	docker compose -p $(PROJECT_NAME) $(ENV_FILE) $(INFRA_FILE) $(DEV_FILE) up -d
+	
+restart-dev-tool:
+	docker compose -p $(PROJECT_NAME) $(ENV_FILE) $(INFRA_FILE) $(DEV_FILE) up -d $(SERVICE)
 
 # ─── Full Stack ───────────────────────────────────────────────
 up-dev:
@@ -26,11 +29,11 @@ up-dev:
 # ─── Rebuild & Start ──────────────────────────────────────────
 rebuild-all:
 	./mvnw clean install -DskipTests
-	docker compose -p $(PROJECT_NAME) $(ENV_FILE) $(INFRA_FILE) $(APP_FILE) up -d --build --remove-orphans
+	docker compose -p $(PROJECT_NAME) $(ENV_FILE) $(INFRA_FILE) $(APP_FILE) up -d --build
 
 rebuild-service:
-	./mvnw clean install -pl services/$(SERVICE) -am -DskipTests
-	docker compose -p $(PROJECT_NAME) $(ENV_FILE) $(INFRA_FILE) $(APP_FILE) up -d --build --remove-orphans $(SERVICE)
+	./mvnw clean install -pl $(MODULE) -am -DskipTests
+	docker compose -p $(PROJECT_NAME) $(ENV_FILE) $(INFRA_FILE) $(APP_FILE) up -d --build $(SERVICE)
 
 # ─── Schema Registry ──────────────────────────────────────────
 register-schemas:
